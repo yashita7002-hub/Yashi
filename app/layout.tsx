@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Yashi | Computer Science Student & Aspiring Software Engineer",
+  title: "Yashita",
   description:
-    "Yashi's cinematic Stranger Things-inspired personal resume website. Explore skills, projects, and experience in a unique immersive interface.",
+    "Curious to explore, fearless to experiment, driven to build what I envision",
   keywords: [
     "Yashi",
     "software engineer",
@@ -49,7 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap"
           rel="stylesheet"
         />
       </head>

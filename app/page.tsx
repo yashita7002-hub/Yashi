@@ -2,629 +2,913 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
-/* ═══════════════════════════════════════════════════════
-   STRANGER THINGS RESUME — YASHI'S PERSONAL WEBSITE
-   ═══════════════════════════════════════════════════════ */
-
-// ──────── Particle Component ────────
-// Pre-computed particle positions to avoid Math.random() hydration mismatch
-const PARTICLE_DATA = [
-  { size: 3.2, left: 5, duration: 18, delay: 1.2 },
-  { size: 4.5, left: 12, duration: 22, delay: 3.5 },
-  { size: 2.8, left: 20, duration: 15, delay: 0.8 },
-  { size: 5.1, left: 28, duration: 20, delay: 5.2 },
-  { size: 3.7, left: 35, duration: 12, delay: 2.1 },
-  { size: 2.3, left: 42, duration: 24, delay: 7.3 },
-  { size: 4.8, left: 48, duration: 16, delay: 4.6 },
-  { size: 3.0, left: 55, duration: 19, delay: 0.3 },
-  { size: 5.5, left: 62, duration: 14, delay: 6.8 },
-  { size: 2.6, left: 68, duration: 21, delay: 2.9 },
-  { size: 4.2, left: 75, duration: 17, delay: 8.1 },
-  { size: 3.5, left: 82, duration: 13, delay: 5.7 },
-  { size: 5.8, left: 88, duration: 23, delay: 1.5 },
-  { size: 2.1, left: 93, duration: 11, delay: 9.2 },
-  { size: 4.0, left: 8, duration: 25, delay: 3.8 },
-  { size: 3.3, left: 17, duration: 10, delay: 6.1 },
-  { size: 5.3, left: 30, duration: 18, delay: 4.0 },
-  { size: 2.9, left: 45, duration: 22, delay: 7.6 },
-  { size: 4.6, left: 58, duration: 14, delay: 0.9 },
-  { size: 3.8, left: 70, duration: 20, delay: 8.5 },
-  { size: 5.0, left: 80, duration: 16, delay: 2.4 },
-  { size: 2.5, left: 90, duration: 12, delay: 5.0 },
-  { size: 4.3, left: 25, duration: 19, delay: 9.8 },
-  { size: 3.1, left: 50, duration: 15, delay: 3.2 },
-  { size: 5.6, left: 95, duration: 21, delay: 6.5 },
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRE-COMPUTED DETERMINISTIC PARTICLES (Next.js 16 hydration safe)
+   ═══════════════════════════════════════════════════════════════════════════ */
+const STATIC_PARTICLES = [
+  { size: 3.5, left: 6, duration: 20, delay: 1.0 },
+  { size: 4.8, left: 14, duration: 24, delay: 3.5 },
+  { size: 2.6, left: 22, duration: 16, delay: 0.8 },
+  { size: 5.2, left: 29, duration: 22, delay: 5.2 },
+  { size: 3.8, left: 37, duration: 14, delay: 2.1 },
+  { size: 2.4, left: 44, duration: 26, delay: 7.3 },
+  { size: 4.9, left: 51, duration: 18, delay: 4.6 },
+  { size: 3.1, left: 58, duration: 21, delay: 0.3 },
+  { size: 5.6, left: 65, duration: 15, delay: 6.8 },
+  { size: 2.8, left: 72, duration: 23, delay: 2.9 },
+  { size: 4.4, left: 79, duration: 19, delay: 8.1 },
+  { size: 3.6, left: 86, duration: 15, delay: 5.7 },
+  { size: 5.9, left: 92, duration: 25, delay: 1.5 },
+  { size: 2.2, left: 96, duration: 12, delay: 9.2 },
+  { size: 4.1, left: 10, duration: 27, delay: 4.0 },
+  { size: 3.3, left: 19, duration: 13, delay: 6.3 },
+  { size: 5.4, left: 33, duration: 19, delay: 3.8 },
+  { size: 3.0, left: 47, duration: 23, delay: 7.8 },
+  { size: 4.7, left: 61, duration: 16, delay: 1.1 },
+  { size: 3.9, left: 75, duration: 21, delay: 8.6 },
+  { size: 5.1, left: 83, duration: 17, delay: 2.5 },
+  { size: 2.7, left: 91, duration: 14, delay: 5.2 },
+  { size: 4.5, left: 27, duration: 20, delay: 9.7 },
+  { size: 3.2, left: 53, duration: 17, delay: 3.4 },
 ];
 
-function Particles({ color }: { color: "red" | "blue" }) {
-  const particles = PARTICLE_DATA.map((p, i) => (
-    <div
-      key={i}
-      className={`particle particle-${color}`}
-      style={{
-        width: `${p.size}px`,
-        height: `${p.size}px`,
-        left: `${p.left}%`,
-        animationDuration: `${p.duration}s`,
-        animationDelay: `${p.delay}s`,
-      }}
-    />
-  ));
-  return <div className="particles-container">{particles}</div>;
-}
-
-// ──────── Red World (Hero / Landing) ────────
-function RedWorld({
-  onEnterUpsideDown,
+/* ═══════════════════════════════════════════════════════════════════════════
+   CINEMATIC INTRO HERO SECTION (PERMANENT 100VH SECTION IN DOCUMENT FLOW)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function IntroHero({
+  theme,
 }: {
-  onEnterUpsideDown: () => void;
+  theme: "red" | "blue";
 }) {
+  const scrollToAbout = () => {
+    document.getElementById("chapter-about")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const isRed = theme === "red";
+  const gifSrc = isRed ? "/redST.gif" : "/blueST.gif";
+
   return (
-    <div className="hero-section">
-      <h1 className="hero-name" id="hero-name">
-        Yashi
-      </h1>
-      <p className="hero-tagline" id="hero-tagline">
-        Computer Science Student · Aspiring Software Engineer
-      </p>
+    <section
+      className="opening-screen"
+      id="intro-hero"
+      role="banner"
+      aria-label="Cinematic Title Sequence"
+    >
+      {/* Background Animated GIF (runs continuously) */}
+      <img
+        src={gifSrc}
+        alt={isRed ? "The Red World Title Animation" : "The Upside Down Title Animation"}
+        className="opening-gif-bg"
+      />
 
-      <div className="hero-intro" id="hero-intro">
-        <p>
-          Welcome to my world. I&apos;m a passionate computer science student
-          driven by curiosity and the desire to build impactful software. From
-          crafting elegant algorithms to designing immersive user experiences, I
-          thrive at the intersection of creativity and technology. Currently
-          exploring full-stack development, machine learning, and everything in
-          between.
+      {/* Atmospheric Contrast & Vignette Overlay */}
+      <div className="opening-gradient-overlay" />
+
+      {/* Top Corner Skip Button */}
+
+      <div className="opening-content">
+        <h1 className="opening-name" id="opening-hero-name">
+          Yashita
+        </h1>
+        <p className="opening-subtitle" id="opening-hero-subtitle">
+          "Curious to explore, fearless to experiment, driven to build what I envision",
         </p>
-      </div>
 
-      <div className="hero-buttons">
-        <a href="#resume" className="btn-red" id="btn-view-resume">
-          <span>📄</span> View Resume
-        </a>
-        <a href="#projects" className="btn-red" id="btn-projects">
-          <span>🚀</span> Projects
-        </a>
-        <a href="#contact" className="btn-red" id="btn-contact">
-          <span>✉️</span> Contact
-        </a>
-      </div>
 
-      <button
-        className="upside-down-btn"
-        onClick={onEnterUpsideDown}
-        id="btn-enter-upside-down"
-        aria-label="Enter the Upside Down - View full resume and projects"
-      >
-        <span style={{ fontSize: "1.3em" }}>⚡</span>
-        Enter the Upside Down
-        <span style={{ fontSize: "1.3em" }}>⚡</span>
-      </button>
-    </div>
+        {/* Scroll To Enter Indicator */}
+        <button
+          onClick={scrollToAbout}
+          className="enter-story-indicator"
+          id="btn-enter-story"
+          aria-label="Scroll to enter About Me section"
+        >
+          <span>Scroll to Enter My Story</span>
+          <span className="indicator-chevron">↓</span>
+        </button>
+      </div>
+    </section>
   );
 }
 
-// ──────── Blue World Navigation ────────
-function BlueNav({ onReturn }: { onReturn: () => void }) {
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+/* ═══════════════════════════════════════════════════════════════════════════
+   STICKY CINEMATIC NAVIGATION BAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+function NavigationBar({
+  theme,
+  onToggleTheme,
+}: {
+  theme: "red" | "blue";
+  onToggleTheme: () => void;
+}) {
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
+  const isRed = theme === "red";
+
   return (
-    <nav className="blue-nav" role="navigation" aria-label="Resume navigation">
-      <button className="nav-link" onClick={() => scrollTo("skills")}>
-        Skills
-      </button>
-      <button className="nav-link" onClick={() => scrollTo("experience")}>
-        Experience
-      </button>
-      <button className="nav-link" onClick={() => scrollTo("projects")}>
-        Projects
-      </button>
-      <button className="nav-link" onClick={() => scrollTo("education")}>
-        Education
-      </button>
-      <button className="nav-link" onClick={() => scrollTo("contact")}>
-        Contact
-      </button>
-      <button
-        className="nav-link"
-        onClick={onReturn}
-        style={{ color: "#f87171" }}
-      >
-        ↩ Return
-      </button>
+    <nav className="site-navbar" role="navigation" aria-label="Main Navigation">
+
+
+      {/* Five Chapter Navigation Links */}
+      <div className="navbar-links">
+        <button
+          className="nav-item-btn"
+          onClick={() => scrollToSection("intro-hero")}
+        >
+          Intro
+        </button>
+        <button
+          className="nav-item-btn"
+          onClick={() => scrollToSection("chapter-about")}
+        >
+          About
+        </button>
+        <button
+          className="nav-item-btn"
+          onClick={() => scrollToSection("chapter-stack")}
+        >
+          Tech Stack
+        </button>
+        <button
+          className="nav-item-btn"
+          onClick={() => scrollToSection("chapter-achievements")}
+        >
+          Achievements
+        </button>
+        <button
+          className="nav-item-btn"
+          onClick={() => scrollToSection("chapter-projects")}
+        >
+          Projects
+        </button>
+        <button
+          className="nav-item-btn"
+          onClick={() => scrollToSection("chapter-contact")}
+        >
+          Contact
+        </button>
+      </div>
+
+      {/* Theme Portal Switcher */}
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <button
+          className="dimension-portal-btn"
+          onClick={onToggleTheme}
+          id="btn-toggle-dimension"
+          aria-label={
+            isRed
+              ? "Enter the Upside Down dimension"
+              : "Return to the real world"
+          }
+        >
+          <span>{isRed ? "⚡ Enter The Upside Down" : "⚡ Return To Real World"}</span>
+        </button>
+      </div>
     </nav>
   );
 }
 
-// ──────── Reveal on Scroll Hook ────────
-function useRevealOnScroll() {
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
-    );
-
-    const elements = document.querySelectorAll(".reveal-section");
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, []);
-}
-
-// ──────── Blue World (Full Resume) ────────
-function BlueWorld({ onReturn }: { onReturn: () => void }) {
-  useRevealOnScroll();
-
-  return (
-    <>
-      <BlueNav onReturn={onReturn} />
-
-      <div className="blue-content">
-        {/* Header */}
-        <div className="glass-card blue-header-card reveal-section">
-          <h1 className="hero-name" style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", marginBottom: "0.5rem" }}>
-            Yashi
-          </h1>
-          <p
-            className="hero-tagline"
-            style={{ color: "var(--blue-accent)", marginBottom: "1rem" }}
-          >
-            Computer Science Student · Aspiring Software Engineer
-          </p>
-          <p
-            style={{
-              color: "var(--text-secondary)",
-              maxWidth: "600px",
-              margin: "0 auto",
-              lineHeight: "1.7",
-              fontSize: "0.95rem",
-            }}
-          >
-            You&apos;ve entered the Upside Down. Here lies my full journey
-            — skills forged, projects built, and experiences gained in my
-            quest to become a software engineer.
-          </p>
-        </div>
-
-        {/* ──── Skills Section ──── */}
-        <section id="skills" className="reveal-section" aria-label="Technical Skills">
-          <h2 className="section-title">Technical Skills</h2>
-          <div className="skills-grid">
-            <div className="glass-card">
-              <h3 className="skill-category-title">Languages</h3>
-              <div className="skill-tags">
-                {["Python", "JavaScript", "TypeScript", "Java", "C++", "SQL", "HTML/CSS"].map(
-                  (s) => (
-                    <span key={s} className="skill-tag">{s}</span>
-                  )
-                )}
-              </div>
-            </div>
-            <div className="glass-card">
-              <h3 className="skill-category-title">Frameworks & Libraries</h3>
-              <div className="skill-tags">
-                {["React", "Next.js", "Node.js", "Express", "TailwindCSS", "Flask", "Django"].map(
-                  (s) => (
-                    <span key={s} className="skill-tag">{s}</span>
-                  )
-                )}
-              </div>
-            </div>
-            <div className="glass-card">
-              <h3 className="skill-category-title">Tools & Platforms</h3>
-              <div className="skill-tags">
-                {["Git", "Docker", "AWS", "Firebase", "MongoDB", "PostgreSQL", "Linux", "VS Code"].map(
-                  (s) => (
-                    <span key={s} className="skill-tag">{s}</span>
-                  )
-                )}
-              </div>
-            </div>
-            <div className="glass-card">
-              <h3 className="skill-category-title">Concepts</h3>
-              <div className="skill-tags">
-                {["Data Structures", "Algorithms", "REST APIs", "Machine Learning", "Agile", "CI/CD"].map(
-                  (s) => (
-                    <span key={s} className="skill-tag">{s}</span>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <hr className="section-divider" />
-
-        {/* ──── Experience Section ──── */}
-        <section id="experience" className="reveal-section" aria-label="Experience">
-          <h2 className="section-title">Experience</h2>
-
-          <div className="glass-card experience-card">
-            <div className="card-header">
-              <div>
-                <h3 className="card-title">Software Engineering Intern</h3>
-                <p className="card-subtitle">Tech Company Inc.</p>
-              </div>
-              <span className="card-date">Jun 2026 — Aug 2026</span>
-            </div>
-            <div className="card-description">
-              <ul>
-                <li>
-                  Developed and deployed RESTful APIs serving 10,000+ daily
-                  requests using Node.js and Express
-                </li>
-                <li>
-                  Collaborated with cross-functional teams to redesign the user
-                  dashboard, improving engagement by 35%
-                </li>
-                <li>
-                  Implemented automated testing pipelines reducing bug reports by
-                  40%
-                </li>
-              </ul>
-              <div className="tech-stack">
-                {["Node.js", "React", "PostgreSQL", "Docker", "Jest"].map((t) => (
-                  <span key={t} className="tech-badge">{t}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card experience-card">
-            <div className="card-header">
-              <div>
-                <h3 className="card-title">Web Development Lead</h3>
-                <p className="card-subtitle">University CS Club</p>
-              </div>
-              <span className="card-date">Sep 2025 — Present</span>
-            </div>
-            <div className="card-description">
-              <ul>
-                <li>
-                  Led a team of 8 developers to build and maintain the club&apos;s
-                  website and internal tools
-                </li>
-                <li>
-                  Organized weekly workshops on modern web technologies, training
-                  50+ students
-                </li>
-                <li>
-                  Architected a project management dashboard using Next.js and
-                  Firebase
-                </li>
-              </ul>
-              <div className="tech-stack">
-                {["Next.js", "Firebase", "TypeScript", "TailwindCSS"].map((t) => (
-                  <span key={t} className="tech-badge">{t}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <hr className="section-divider" />
-
-        {/* ──── Projects Section ──── */}
-        <section id="projects" className="reveal-section" aria-label="Projects">
-          <h2 className="section-title">Projects</h2>
-
-          <div className="glass-card experience-card">
-            <div className="card-header">
-              <div>
-                <h3 className="card-title">AI Study Companion</h3>
-                <p className="card-subtitle">Full-Stack AI Application</p>
-              </div>
-              <span className="card-date">2026</span>
-            </div>
-            <div className="card-description">
-              <p>
-                An intelligent study assistant powered by GPT-4 that generates
-                personalized quizzes, flashcards, and summaries from uploaded
-                notes and textbooks. Features real-time progress tracking and
-                adaptive difficulty.
-              </p>
-              <div className="tech-stack">
-                {["Python", "Flask", "React", "OpenAI API", "MongoDB"].map((t) => (
-                  <span key={t} className="tech-badge">{t}</span>
-                ))}
-              </div>
-              <div className="project-links">
-                <a href="#" className="project-link">
-                  🔗 Live Demo
-                </a>
-                <a href="#" className="project-link">
-                  💻 Source Code
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card experience-card">
-            <div className="card-header">
-              <div>
-                <h3 className="card-title">EcoTrack — Carbon Footprint Tracker</h3>
-                <p className="card-subtitle">Mobile-First Web App</p>
-              </div>
-              <span className="card-date">2025</span>
-            </div>
-            <div className="card-description">
-              <p>
-                A gamified sustainability app that tracks daily carbon
-                emissions, provides personalized reduction tips, and connects
-                users with local environmental initiatives. Achieved 500+ beta
-                users.
-              </p>
-              <div className="tech-stack">
-                {["Next.js", "Node.js", "PostgreSQL", "Chart.js", "PWA"].map(
-                  (t) => (
-                    <span key={t} className="tech-badge">{t}</span>
-                  )
-                )}
-              </div>
-              <div className="project-links">
-                <a href="#" className="project-link">
-                  🔗 Live Demo
-                </a>
-                <a href="#" className="project-link">
-                  💻 Source Code
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card experience-card">
-            <div className="card-header">
-              <div>
-                <h3 className="card-title">CryptoVault — Secure Password Manager</h3>
-                <p className="card-subtitle">Security-Focused Desktop App</p>
-              </div>
-              <span className="card-date">2025</span>
-            </div>
-            <div className="card-description">
-              <p>
-                An end-to-end encrypted password manager with biometric
-                authentication, secure sharing, and breach detection alerts.
-                Built with a zero-knowledge architecture.
-              </p>
-              <div className="tech-stack">
-                {["Java", "JavaFX", "AES-256", "SQLite", "Bcrypt"].map((t) => (
-                  <span key={t} className="tech-badge">{t}</span>
-                ))}
-              </div>
-              <div className="project-links">
-                <a href="#" className="project-link">
-                  💻 Source Code
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <hr className="section-divider" />
-
-        {/* ──── Education Section ──── */}
-        <section id="education" className="reveal-section" aria-label="Education">
-          <h2 className="section-title">Education</h2>
-
-          <div className="glass-card">
-            <div className="education-card">
-              <div className="edu-icon">🎓</div>
-              <div className="edu-details">
-                <h3 className="card-title">
-                  Bachelor of Science in Computer Science
-                </h3>
-                <p className="card-subtitle">University Name</p>
-                <span className="card-date">Expected Graduation: May 2027</span>
-                <div className="card-description" style={{ marginTop: "0.75rem" }}>
-                  <ul>
-                    <li>GPA: 3.8/4.0 — Dean&apos;s List</li>
-                    <li>
-                      Relevant Coursework: Data Structures &amp; Algorithms,
-                      Operating Systems, Database Systems, Machine Learning,
-                      Software Engineering, Computer Networks
-                    </li>
-                    <li>
-                      Activities: CS Club (Web Dev Lead), Hackathon Club,
-                      Teaching Assistant for Intro to Programming
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <hr className="section-divider" />
-
-        {/* ──── Contact Section ──── */}
-        <section id="contact" className="reveal-section" aria-label="Contact Information">
-          <h2 className="section-title">Contact</h2>
-
-          <div className="glass-card">
-            <div className="contact-grid">
-              <a href="mailto:yashi@example.com" className="contact-item" id="contact-email">
-                <span className="contact-icon">📧</span>
-                <div>
-                  <div className="contact-label">Email</div>
-                  <div className="contact-value">yashi@example.com</div>
-                </div>
-              </a>
-              <a
-                href="https://github.com/yashi"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="contact-item"
-                id="contact-github"
-              >
-                <span className="contact-icon">🐙</span>
-                <div>
-                  <div className="contact-label">GitHub</div>
-                  <div className="contact-value">github.com/yashi</div>
-                </div>
-              </a>
-              <a
-                href="https://linkedin.com/in/yashi"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="contact-item"
-                id="contact-linkedin"
-              >
-                <span className="contact-icon">💼</span>
-                <div>
-                  <div className="contact-label">LinkedIn</div>
-                  <div className="contact-value">linkedin.com/in/yashi</div>
-                </div>
-              </a>
-              <a href="#" className="contact-item" id="contact-portfolio">
-                <span className="contact-icon">🌐</span>
-                <div>
-                  <div className="contact-label">Portfolio</div>
-                  <div className="contact-value">yashi.dev</div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* Return Button */}
-        <div style={{ textAlign: "center", marginTop: "3rem" }}>
-          <button
-            className="btn-blue return-btn"
-            onClick={onReturn}
-            id="btn-return-to-red"
-            aria-label="Return to the red world"
-          >
-            <span>⚡</span>
-            Return to the Surface
-            <span>⚡</span>
-          </button>
-        </div>
-
-        {/* Footer */}
-        <footer className="footer">
-          <p>
-            Designed &amp; Built by Yashi · Inspired by Stranger Things ·{" "}
-            {new Date().getFullYear()}
-          </p>
-        </footer>
-      </div>
-    </>
-  );
-}
-
-// ═══════════════════════════════════════════════════════
-//   MAIN PAGE COMPONENT
-// ═══════════════════════════════════════════════════════
-
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAIN CINEMATIC RESUME PAGE COMPONENT
+   ═══════════════════════════════════════════════════════════════════════════ */
 export default function Home() {
-  const [world, setWorld] = useState<"red" | "blue">("red");
+  const [theme, setTheme] = useState<"red" | "blue">("red");
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Clean up timeouts
   useEffect(() => {
     return () => {
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
+      if (transitionRef.current) clearTimeout(transitionRef.current);
     };
   }, []);
 
-  const triggerTransition = useCallback(
-    (targetWorld: "red" | "blue") => {
-      if (isTransitioning) return;
-      setIsTransitioning(true);
+  /* ── Switch Dimensions (Red World <-> Upside Down) ── */
+  const toggleTheme = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
 
-      // At the midpoint of the flicker (1.1s), swap the world
-      transitionTimeoutRef.current = setTimeout(() => {
-        setWorld(targetWorld);
-        window.scrollTo({ top: 0, behavior: "instant" });
-      }, 1100);
+    transitionRef.current = setTimeout(() => {
+      setTheme((prev) => (prev === "red" ? "blue" : "red"));
+      setIsTransitioning(false);
+    }, 750);
+  }, [isTransitioning]);
 
-      // After full transition animation (2.4s), re-enable interaction
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 2400);
-    },
-    [isTransitioning]
-  );
-
-  const enterUpsideDown = useCallback(() => {
-    triggerTransition("blue");
-  }, [triggerTransition]);
-
-  const returnToSurface = useCallback(() => {
-    triggerTransition("red");
-  }, [triggerTransition]);
+  const isRed = theme === "red";
 
   return (
-    <div className={`scene-container ${world === "blue" ? "glitch-active" : ""}`}>
-      {/* ── Background Layers ── */}
+    <div
+      className={`portfolio-root ${isRed ? "theme-red" : "theme-blue"} ${isTransitioning ? "transitioning-distortion" : ""
+        }`}
+    >
+      {/* ── TRANSITION FLICKER / WARP OVERLAY ── */}
       <div
-        className={`bg-layer bg-red ${world === "red" ? "active" : "inactive"}`}
-        aria-hidden="true"
-      />
-      <div
-        className={`bg-layer bg-blue ${world === "blue" ? "active" : "inactive"}`}
-        aria-hidden="true"
-      />
-
-      {/* ── Cinematic Overlays ── */}
-      <div
-        className={`overlay-gradient-red ${world === "blue" ? "inactive" : ""}`}
-        style={{ opacity: world === "red" ? 1 : 0 }}
-        aria-hidden="true"
-      />
-      <div
-        className={`overlay-gradient-blue ${world === "red" ? "inactive" : ""}`}
-        style={{ opacity: world === "blue" ? 1 : 0 }}
+        className={`transition-flicker-layer ${isTransitioning ? "active" : ""}`}
         aria-hidden="true"
       />
 
-      {/* ── Atmospheric Effects ── */}
-      <div className="fog-layer" aria-hidden="true" />
-      <div className="scanlines" aria-hidden="true" />
-      <div className="vignette" aria-hidden="true" />
-      <div className="glitch-overlay" aria-hidden="true" />
+      {/* ── ATMOSPHERIC SCANLINES & VIGNETTE ── */}
+      <div className="scanlines-overlay" aria-hidden="true" />
+      <div className="vignette-overlay" aria-hidden="true" />
 
-      {/* ── Particles ── */}
-      <Particles color={world} />
-
-      {/* ── Transition Flicker Overlay ── */}
-      <div
-        className={`transition-overlay ${isTransitioning ? "active" : ""}`}
-        aria-hidden="true"
-      />
-
-      {/* ── Content ── */}
-      <div className="content-wrapper">
-        {/* Red World */}
-        <div
-          className={`world-red ${world !== "red" ? "hidden-world" : ""}`}
-          role="region"
-          aria-label="Welcome section"
-        >
-          <RedWorld onEnterUpsideDown={enterUpsideDown} />
-        </div>
-
-        {/* Blue World */}
-        <div
-          className={`world-blue ${world !== "blue" ? "hidden-world" : ""}`}
-          role="region"
-          aria-label="Resume details"
-        >
-          {world === "blue" && <BlueWorld onReturn={returnToSurface} />}
-        </div>
+      {/* ── FLOATING ATMOSPHERIC PARTICLES ── */}
+      <div className="particles-layer" aria-hidden="true">
+        {STATIC_PARTICLES.map((p, i) => (
+          <div
+            key={i}
+            className="particle"
+            style={{
+              width: `${p.size}px`,
+              height: `${p.size}px`,
+              left: `${p.left}%`,
+              animationDuration: `${p.duration}s`,
+              animationDelay: `${p.delay}s`,
+            }}
+          />
+        ))}
       </div>
+
+      {/* ── FIXED TOP NAVIGATION BAR (VISIBLE ON LOAD & SCROLL) ── */}
+      <NavigationBar
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+
+      {/* ── 1. FULL-SCREEN CONTINUOUS CINEMATIC INTRO ── */}
+      <IntroHero theme={theme} />
+
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          THE PORTFOLIO: A STORY IN FIVE CHAPTERS
+          ═══════════════════════════════════════════════════════════════════ */}
+      <main className="portfolio-container" id="main-content">
+
+        {/* ─────────────────────────────────────────────────────────────────
+            CHAPTER 01 — ABOUT ME
+            ───────────────────────────────────────────────────────────────── */}
+        <section
+          id="chapter-about"
+          className="chapter-section"
+          aria-labelledby="heading-chapter-01"
+        >
+          <header className="chapter-header">
+            <span className="chapter-number-badge">Chapter 01</span>
+            <h2 className="chapter-title" id="heading-chapter-01">
+              About Me
+            </h2>
+            <p className="chapter-subtitle">
+              Curiosity, Algorithms &amp; The Search for Answers
+            </p>
+          </header>
+
+          <div className="cinematic-card">
+            <div className="about-editorial-grid">
+              {/* Left Column: Authentic Storytelling Narrative */}
+              <div>
+                <p className="about-lead-text">
+                  I am a passionate <strong>Computer Science student</strong>{" "}
+                  and aspiring software engineer driven by an insatiable curiosity
+                  to understand how complex technological systems work beneath the surface.
+                </p>
+
+                <p className="about-paragraph">
+                  My technical journey began with a fascination for logic puzzles
+                  and algorithmic thinking. Over time, that curiosity evolved into
+                  designing and building full-stack web applications, exploring
+                  distributed backends, and examining how thoughtful software
+                  engineering can create measurable, positive real-world impact.
+                </p>
+
+                <p className="about-paragraph">
+                  Whether diving deep into data structures, architecting RESTful
+                  APIs, or crafting responsive user interfaces with cinematic
+                  attention to detail, I thrive in environments that challenge me
+                  to learn rapidly, write clean and maintainable code, and solve
+                  ambiguous problems.
+                </p>
+
+                <p className="about-paragraph" style={{ marginBottom: 0 }}>
+                  <strong>My Ambition:</strong> To collaborate with forward-thinking
+                  engineering teams on scalable platforms, contribute meaningfully
+                  to open-source technology, and build software that feels as intuitive
+                  as it is robust.
+                </p>
+              </div>
+
+              {/* Right Column: Key Highlights & Learning Focus */}
+              <div className="about-highlights-col">
+                <div className="highlight-box">
+                  <h3 className="highlight-box-title">
+                    <span>💻</span> Engineering Mindset
+                  </h3>
+                  <p className="highlight-box-desc">
+                    Emphasizing code modularity, rigorous algorithmic problem solving,
+                    and clean architectural design patterns.
+                  </p>
+                </div>
+
+                <div className="highlight-box">
+                  <h3 className="highlight-box-title">
+                    <span>⚡</span> Continuous Exploration
+                  </h3>
+                  <p className="highlight-box-desc">
+                    Constantly experimenting with modern frameworks, cloud primitives,
+                    and AI integration to expand technical breadth.
+                  </p>
+                </div>
+
+                <div className="highlight-box">
+                  <h3 className="highlight-box-title">
+                    <span>🤝</span> Collaborative Growth
+                  </h3>
+                  <p className="highlight-box-desc">
+                    Active participant in hackathons, university developer circles,
+                    and peer code reviews.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────
+            CHAPTER 02 — TECH STACK
+            ───────────────────────────────────────────────────────────────── */}
+        <section
+          id="chapter-stack"
+          className="chapter-section"
+          aria-labelledby="heading-chapter-02"
+        >
+          <header className="chapter-header">
+            <span className="chapter-number-badge">Chapter 02</span>
+            <h2 className="chapter-title" id="heading-chapter-02">
+              Tech Stack
+            </h2>
+            <p className="chapter-subtitle">
+              Tools, Languages &amp; Weapons of Choice
+            </p>
+          </header>
+
+          <div className="stack-categories-grid">
+            {/* 1. Programming Languages */}
+            <div className="cinematic-card stack-category-card">
+              <div className="stack-category-header">
+                <span className="stack-category-icon">⌨️</span>
+                <h3 className="stack-category-title">Programming Languages</h3>
+              </div>
+              <div className="stack-chips-wrap">
+                {[
+                  "Python",
+                  "TypeScript",
+                  "JavaScript",
+                  "Java",
+                  "C++",
+                  "C",
+                  "SQL",
+                  "HTML5 / CSS3",
+                ].map((skill) => (
+                  <span key={skill} className="stack-chip">
+                    <span className="chip-dot" />
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. Frontend */}
+            <div className="cinematic-card stack-category-card">
+              <div className="stack-category-header">
+                <span className="stack-category-icon">🎨</span>
+                <h3 className="stack-category-title">Frontend Engineering</h3>
+              </div>
+              <div className="stack-chips-wrap">
+                {[
+                  "React",
+                  "Next.js",
+                  "Tailwind CSS",
+                  "Responsive UI",
+                  "Web APIs",
+                  "State Management",
+                  "CSS Modules",
+                ].map((skill) => (
+                  <span key={skill} className="stack-chip">
+                    <span className="chip-dot" />
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Backend */}
+            <div className="cinematic-card stack-category-card">
+              <div className="stack-category-header">
+                <span className="stack-category-icon">⚙️</span>
+                <h3 className="stack-category-title">Backend Architecture</h3>
+              </div>
+              <div className="stack-chips-wrap">
+                {[
+                  "Node.js",
+                  "Express.js",
+                  "Python (Flask / FastAPI)",
+                  "RESTful APIs",
+                  "Authentication (JWT)",
+                  "Middleware",
+                ].map((skill) => (
+                  <span key={skill} className="stack-chip">
+                    <span className="chip-dot" />
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* 4. Databases */}
+            <div className="cinematic-card stack-category-card">
+              <div className="stack-category-header">
+                <span className="stack-category-icon">🗄️</span>
+                <h3 className="stack-category-title">Databases &amp; Storage</h3>
+              </div>
+              <div className="stack-chips-wrap">
+                {[
+                  "PostgreSQL",
+                  "MongoDB",
+                  "MySQL",
+                  "Firebase Firestore",
+                  "SQLite",
+                  "Database Schema Design",
+                ].map((skill) => (
+                  <span key={skill} className="stack-chip">
+                    <span className="chip-dot" />
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* 5. Tools & Technologies */}
+            <div className="cinematic-card stack-category-card" style={{ gridColumn: "1 / -1" }}>
+              <div className="stack-category-header">
+                <span className="stack-category-icon">🛠️</span>
+                <h3 className="stack-category-title">Tools, Platforms &amp; Workflows</h3>
+              </div>
+              <div className="stack-chips-wrap">
+                {[
+                  "Git & GitHub",
+                  "Docker (Basics)",
+                  "Linux / Bash",
+                  "Postman",
+                  "VS Code",
+                  "Vercel",
+                  "CI/CD Workflows",
+                  "Agile Methodology",
+                  "Object-Oriented Programming",
+                  "Data Structures & Algorithms",
+                ].map((skill) => (
+                  <span key={skill} className="stack-chip">
+                    <span className="chip-dot" />
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────
+            CHAPTER 03 — ACHIEVEMENTS
+            ───────────────────────────────────────────────────────────────── */}
+        <section
+          id="chapter-achievements"
+          className="chapter-section"
+          aria-labelledby="heading-chapter-03"
+        >
+          <header className="chapter-header">
+            <span className="chapter-number-badge">Chapter 03</span>
+            <h2 className="chapter-title" id="heading-chapter-03">
+              Achievements
+            </h2>
+            <p className="chapter-subtitle">
+              Milestones &amp; Accomplishments Along The Journey
+            </p>
+          </header>
+
+          <div className="achievements-timeline">
+            {/* Milestone 1: Academic Excellence */}
+            <div className="cinematic-card achievement-card">
+              <div className="achievement-marker-col">
+                <div className="achievement-icon-circle">🎓</div>
+              </div>
+              <div className="achievement-content">
+                <div className="achievement-header-row">
+                  <h3 className="achievement-title">
+                    Academic Excellence in Computer Science
+                  </h3>
+                  <span className="achievement-date-tag">Academic Milestone</span>
+                </div>
+                <p className="achievement-desc">
+                  Consistently maintained high academic standing in core Computer
+                  Science coursework including Data Structures &amp; Algorithms,
+                  Computer Systems, Database Design, and Software Engineering Principles.
+                </p>
+                <span className="achievement-tag">
+                  ✦ Academic Distinction Candidate
+                </span>
+              </div>
+            </div>
+
+            {/* Milestone 2: Algorithmic Problem Solving */}
+            <div className="cinematic-card achievement-card">
+              <div className="achievement-marker-col">
+                <div className="achievement-icon-circle">🧩</div>
+              </div>
+              <div className="achievement-content">
+                <div className="achievement-header-row">
+                  <h3 className="achievement-title">
+                    Algorithmic &amp; Problem Solving Milestones
+                  </h3>
+                  <span className="achievement-date-tag">Technical Milestone</span>
+                </div>
+                <p className="achievement-desc">
+                  Solved 200+ competitive programming challenges across dynamic
+                  programming, graph traversal, and optimization problems on LeetCode
+                  and HackerRank, sharpening time and space complexity analysis.
+                </p>
+                <span className="achievement-tag">
+                  ✦ 200+ Problems Solved &middot; Continuous Practice
+                </span>
+              </div>
+            </div>
+
+            {/* Milestone 3: Hackathon Participation */}
+            <div className="cinematic-card achievement-card">
+              <div className="achievement-marker-col">
+                <div className="achievement-icon-circle">🏆</div>
+              </div>
+              <div className="achievement-content">
+                <div className="achievement-header-row">
+                  <h3 className="achievement-title">
+                    Hackathon Prototype Sprint Competitions
+                  </h3>
+                  <span className="achievement-date-tag">Collegiate Hackathons</span>
+                </div>
+                <p className="achievement-desc">
+                  Collaborated in multidisciplinary developer teams under strict
+                  36-hour sprint constraints to conceptualize, design, and deploy
+                  functional full-stack web prototypes addressing real-world civic
+                  and educational challenges.
+                </p>
+                <span className="achievement-tag">
+                  ✦ Team Builder &middot; Rapid Prototyping
+                </span>
+              </div>
+            </div>
+
+            {/* Milestone 4: Community & Leadership */}
+            <div className="cinematic-card achievement-card">
+              <div className="achievement-marker-col">
+                <div className="achievement-icon-circle">👥</div>
+              </div>
+              <div className="achievement-content">
+                <div className="achievement-header-row">
+                  <h3 className="achievement-title">
+                    Student Developer Community Mentorship
+                  </h3>
+                  <span className="achievement-date-tag">Leadership &amp; Peer Learning</span>
+                </div>
+                <p className="achievement-desc">
+                  Actively participated in campus technology clubs, leading introductory
+                  walkthroughs on Git/GitHub version control, modern JavaScript, and
+                  open-source contribution workflows for early-year computer science peers.
+                </p>
+                <span className="achievement-tag">
+                  ✦ Peer Mentorship &middot; Knowledge Sharing
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────
+            CHAPTER 04 — PROJECTS
+            ───────────────────────────────────────────────────────────────── */}
+        <section
+          id="chapter-projects"
+          className="chapter-section"
+          aria-labelledby="heading-chapter-04"
+        >
+          <header className="chapter-header">
+            <span className="chapter-number-badge">Chapter 04</span>
+            <h2 className="chapter-title" id="heading-chapter-04">
+              Projects
+            </h2>
+            <p className="chapter-subtitle">
+              Major Experiments, Architectures &amp; Discoveries
+            </p>
+          </header>
+
+          <div className="projects-grid">
+            {/* Project 1: AI Study Companion */}
+            <article className="cinematic-card project-item-card">
+              <div className="project-top-row">
+                <div>
+                  <span className="project-problem-badge">
+                    Problem Solved: Information Overload &amp; Active Recall Retention
+                  </span>
+                  <h3 className="project-name">AI Study Companion</h3>
+                </div>
+                <span className="achievement-date-tag">Full-Stack AI Project</span>
+              </div>
+
+              <p className="project-description">
+                An intelligent study assistant that transforms lengthy academic lecture notes
+                and course materials into interactive, adaptive quizzes, dynamic flashcards,
+                and structured concept summaries. Designed to streamline exam preparation through
+                active recall.
+              </p>
+
+              <div>
+                <strong style={{ fontSize: "0.85rem", color: "var(--text-primary)" }}>
+                  Key Features &amp; Contributions:
+                </strong>
+                <ul className="project-features-list">
+                  <li>Engineered streaming AI completions using OpenAI API with context-aware system prompts.</li>
+                  <li>Built responsive client interface with real-time quiz scoring and progress evaluation.</li>
+                  <li>Implemented local persistence for generated study decks and custom flashcard sets.</li>
+                </ul>
+              </div>
+
+              <div className="project-tech-row">
+                {["Next.js", "TypeScript", "OpenAI API", "Node.js", "Tailwind CSS", "Vercel"].map(
+                  (tech) => (
+                    <span key={tech} className="project-tech-badge">
+                      {tech}
+                    </span>
+                  )
+                )}
+              </div>
+
+              <div className="project-links-row">
+                <a
+                  href="https://github.com/yashi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="project-link-btn project-link-primary"
+                  id="link-project-ai-github"
+                >
+                  <span>💻</span> Source Code
+                </a>
+                <a
+                  href="#contact"
+                  className="project-link-btn project-link-secondary"
+                  id="link-project-ai-demo"
+                >
+                  <span>🔗</span> Request Demo / Preview
+                </a>
+              </div>
+            </article>
+
+            {/* Project 2: EcoTrack */}
+            <article className="cinematic-card project-item-card">
+              <div className="project-top-row">
+                <div>
+                  <span className="project-problem-badge">
+                    Problem Solved: Lack of Actionable Personal Carbon Tracking
+                  </span>
+                  <h3 className="project-name">EcoTrack — Carbon Footprint Tracker</h3>
+                </div>
+                <span className="achievement-date-tag">Web Application</span>
+              </div>
+
+              <p className="project-description">
+                A gamified sustainability web application that empowers individuals to calculate,
+                monitor, and diminish their daily carbon footprint across transportation, dietary
+                choices, and home energy consumption through actionable, personalized milestones.
+              </p>
+
+              <div>
+                <strong style={{ fontSize: "0.85rem", color: "var(--text-primary)" }}>
+                  Key Features &amp; Contributions:
+                </strong>
+                <ul className="project-features-list">
+                  <li>Designed normalized relational database schema in PostgreSQL for logging daily activity metrics.</li>
+                  <li>Built dynamic visual analytics dashboards using Chart.js to visualize emission trends over time.</li>
+                  <li>Constructed secure RESTful endpoints in Node.js/Express for authenticated user profile management.</li>
+                </ul>
+              </div>
+
+              <div className="project-tech-row">
+                {["React", "Node.js", "Express", "PostgreSQL", "Chart.js", "JWT Auth"].map(
+                  (tech) => (
+                    <span key={tech} className="project-tech-badge">
+                      {tech}
+                    </span>
+                  )
+                )}
+              </div>
+
+              <div className="project-links-row">
+                <a
+                  href="https://github.com/yashi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="project-link-btn project-link-primary"
+                  id="link-project-ecotrack-github"
+                >
+                  <span>💻</span> Source Code
+                </a>
+                <a
+                  href="#contact"
+                  className="project-link-btn project-link-secondary"
+                  id="link-project-ecotrack-demo"
+                >
+                  <span>🔗</span> Architecture Specs
+                </a>
+              </div>
+            </article>
+
+            {/* Project 3: CryptoVault */}
+            <article className="cinematic-card project-item-card">
+              <div className="project-top-row">
+                <div>
+                  <span className="project-problem-badge">
+                    Problem Solved: Insecure Local Storage &amp; Credential Vulnerability
+                  </span>
+                  <h3 className="project-name">CryptoVault — Secure Password Manager</h3>
+                </div>
+                <span className="achievement-date-tag">Security &amp; Systems</span>
+              </div>
+
+              <p className="project-description">
+                A desktop-first encrypted credential vault engineered with a strict zero-knowledge
+                architecture. Employs military-grade AES-256 GCM encryption and PBKDF2 key derivation
+                to ensure credentials are fully encrypted prior to local database storage.
+              </p>
+
+              <div>
+                <strong style={{ fontSize: "0.85rem", color: "var(--text-primary)" }}>
+                  Key Features &amp; Contributions:
+                </strong>
+                <ul className="project-features-list">
+                  <li>Utilized AES-256 GCM with unique nonces per vault record to prevent replay and ciphertext manipulation.</li>
+                  <li>Integrated cryptographically secure pseudo-random number generation for high-entropy password creation.</li>
+                  <li>Structured resilient local database layer in SQLite with master key verification hashing.</li>
+                </ul>
+              </div>
+
+              <div className="project-tech-row">
+                {["Java", "JavaFX", "AES-256", "PBKDF2", "SQLite", "Cryptography"].map(
+                  (tech) => (
+                    <span key={tech} className="project-tech-badge">
+                      {tech}
+                    </span>
+                  )
+                )}
+              </div>
+
+              <div className="project-links-row">
+                <a
+                  href="https://github.com/yashi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="project-link-btn project-link-primary"
+                  id="link-project-cryptovault-github"
+                >
+                  <span>💻</span> Source Code
+                </a>
+                <a
+                  href="#contact"
+                  className="project-link-btn project-link-secondary"
+                  id="link-project-cryptovault-demo"
+                >
+                  <span>📖</span> Security Documentation
+                </a>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────────────
+            CHAPTER 05 — GET IN TOUCH (THE NEXT CHAPTER STARTS HERE)
+            ───────────────────────────────────────────────────────────────── */}
+        <section
+          id="chapter-contact"
+          className="chapter-section"
+          aria-labelledby="heading-chapter-05"
+        >
+          <header className="chapter-header">
+            <span className="chapter-number-badge">Chapter 05</span>
+            <h2 className="chapter-title" id="heading-chapter-05">
+              The Next Chapter Starts Here
+            </h2>
+            <p className="chapter-subtitle">
+              Connecting Parallel Realities &middot; Open to Opportunities
+            </p>
+          </header>
+
+          <div className="cinematic-card contact-chapter-card">
+            <p className="contact-invitation-text">
+              I am actively seeking <strong>software engineering internships</strong>,{" "}
+              research collaborations, and full-stack development opportunities.
+              Whether you have an ambitious idea, an engineering challenge, or
+              simply want to discuss technology and Stranger Things — I would love to connect.
+            </p>
+
+            {/* Contact Action Cards */}
+            <div className="contact-cards-grid">
+              {/* Email */}
+              <a
+                href="mailto:yashi.cs@example.com"
+                className="contact-action-card"
+                id="contact-email"
+              >
+                <span className="contact-icon-large">📧</span>
+                <div>
+                  <div className="contact-type-label">Email Direct</div>
+                  <div className="contact-value-text">yashi.cs@example.com</div>
+                </div>
+              </a>
+
+              {/* GitHub */}
+              <a
+                href="https://github.com/yashi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contact-action-card"
+                id="contact-github"
+              >
+                <span className="contact-icon-large">🐙</span>
+                <div>
+                  <div className="contact-type-label">GitHub Profile</div>
+                  <div className="contact-value-text">github.com/yashi</div>
+                </div>
+              </a>
+
+              {/* LinkedIn */}
+              <a
+                href="https://linkedin.com/in/yashi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contact-action-card"
+                id="contact-linkedin"
+              >
+                <span className="contact-icon-large">💼</span>
+                <div>
+                  <div className="contact-type-label">LinkedIn</div>
+                  <div className="contact-value-text">linkedin.com/in/yashi</div>
+                </div>
+              </a>
+
+              {/* Resume Download / View */}
+              <a
+                href="#chapter-about"
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert("Resume PDF Download: Connect via email to receive the latest academic and technical resume.");
+                }}
+                className="contact-action-card"
+                id="contact-resume"
+              >
+                <span className="contact-icon-large">📄</span>
+                <div>
+                  <div className="contact-type-label">Curriculum Vitae</div>
+                  <div className="contact-value-text">Request Resume PDF</div>
+                </div>
+              </a>
+            </div>
+
+            {/* Upside Down Switcher Button in Closing Section */}
+            <div style={{ marginBottom: "2.5rem" }}>
+              <button
+                className="dimension-portal-btn"
+                onClick={toggleTheme}
+                style={{ padding: "0.85rem 2rem", fontSize: "0.95rem" }}
+                id="btn-footer-toggle-dimension"
+              >
+                {isRed ? "⚡ Enter The Upside Down" : "⚡ Return To The Real World"}
+              </button>
+            </div>
+
+            {/* Memorable Closing Line Required by Prompt */}
+            <div className="closing-quote-box">
+              <p className="closing-quote-text">
+                “The next chapter hasn&apos;t been written yet.”
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      {/* ── FOOTER ── */}
+      <footer className="cinematic-footer">
+        <p>
+          Designed &amp; Developed by <strong>Yashi</strong> &middot; Inspired by Stranger Things &middot; Two Parallel Dimensions
+        </p>
+      </footer>
     </div>
   );
 }
